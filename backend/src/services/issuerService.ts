@@ -1,5 +1,3 @@
-// backend/src/services/issuerService.ts
-
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";

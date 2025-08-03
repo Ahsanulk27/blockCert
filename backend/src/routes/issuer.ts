@@ -5,12 +5,17 @@ import {
   registerIssuer,
   loginIssuer,
   getAllIssuers
-} from "./../controllers/issuerController";
+} from "../controllers/issuerController";
+import { authenticateToken } from "../middleware/auth";
 
 const router = express.Router();
 
+// Public routes
 router.post("/register", registerIssuer);
 router.post("/login", loginIssuer);
-router.get("/", getAllIssuers);
+
+// Protected routes - require authentication
+router.get("/", authenticateToken, getAllIssuers);
+
 
 export default router;

@@ -2,6 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
 import issuerRoutes from './routes/issuer';
+import certificateRoutes from "./routes/certificateRoutes";
 dotenv.config();
 import cors from "cors";
 
@@ -19,6 +20,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use("/api/issuer", issuerRoutes);
+app.use("/api/certificates", certificateRoutes);
 
 app.get('/', (req,res) => {
     console.log("API is running")

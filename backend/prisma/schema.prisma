@@ -14,10 +14,28 @@ datasource db {
 }
 
 model Issuer {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  certificates Certificate[]
+}
+
+model Certificate {
+  id                String   @id @default(uuid())
+  studentName       String
+  studentId         String
+  institutionName String
+  course            String
+  grade             String
+  dateIssued        DateTime
+  additionalNotes   String?
+  fileUrl           String?
+  blockchainHash    String?
+  transactionId     String?
+  issuer            Issuer   @relation(fields: [issuerId], references: [id])
+  issuerId          String
+  createdAt         DateTime @default(now())
 }
