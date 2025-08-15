@@ -1,0 +1,39 @@
+import fs from "fs";
+import path from "path";
+import puppeteer from "puppeteer";
+
+export async function generateCertificatePDF(data: any) {
+  // Load HTML template
+  const templatePath = path.join(__dirname, "../templates/certificate.html");
+  let html = fs.readFileSync(templatePath, "utf-8");
+
+  // Replace placeholders
+  html = html
+    .replace("{{STUDENT_NAME}}", data.studentName)
+    .replace("{{COURSE_NAME}}", data.course)
+    .replace("{{GRADE}}", data.grade)
+    .replace("{{INSTITUTION}}", data.institutionName)
+    .replace("{{DATE}}", data.dateIssued.toDateString());
+
+  // Launch headless browser
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  // Set HTML content
+  await page.setContent(html, { waitUntil: "networkidle0" });
+
+  // Save PDF
+  const publicDir = path.join(__dirname, "../../certificates");
+  if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir, { recursive: true });
+  }
+  const fileName = `${data.studentName}_${data.course}.pdf`;
+  const outputPath = path.join(publicDir, fileName);
+
+  
+
+  await page.pdf({ path: outputPath, format: "A4" });
+
+  await browser.close();
+  return outputPath;
+}

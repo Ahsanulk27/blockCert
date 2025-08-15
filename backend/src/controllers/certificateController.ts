@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import createcertificate from "../services/certificateService";
+import { generateCertificatePDF } from "../../utils/generateCertificate";
 
 export const issueCertificate = async (req: Request, res: Response) => {
   try {
@@ -13,7 +14,6 @@ export const issueCertificate = async (req: Request, res: Response) => {
       notes,
     } = req.body;
 
-   
     const issuerId = req.user?.id;
 
     if (!issuerId) {
@@ -34,10 +34,22 @@ export const issueCertificate = async (req: Request, res: Response) => {
       issuerId,
     });
 
-    // 4. Respond with success and the newly created certificate data
+    const pdfPath = await generateCertificatePDF({
+      studentName: certificate.studentName,
+      course: certificate.course,
+      grade: certificate.grade,
+      institutionName: certificate.institutionName,
+      dateIssued: certificate.dateIssued,
+    });
+
+    // Create a public URL instead of local file path
+    const fileName = `${certificate.studentName}_${certificate.course}.pdf`;
+    const pdfUrl =  `/certificates/${certificate.studentName}_${certificate.course}.pdf`;
+    
     return res.status(201).json({
       message: "Certificate issued successfully",
       certificate,
+      pdfUrl, 
     });
   } catch (error) {
     console.error("Error issuing certificate:", error);

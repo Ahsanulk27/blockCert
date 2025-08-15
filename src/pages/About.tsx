@@ -211,26 +211,6 @@ export default function About() {
             })}
           </div>
         </section>
-
-        {/* Academic Project Notice */}
-        <Card className="card-blockchain p-8 text-center border-warning/30 bg-warning/5">
-          <GraduationCap className="w-12 h-12 text-warning mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-3">Academic Research Project</h3>
-          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            This platform was developed as part of academic research into blockchain applications 
-            in educational technology. The implementation demonstrates practical applications of 
-            distributed ledger technology for credential verification and anti-fraud measures.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button variant="outline">
-              View Research Paper
-            </Button>
-            <Button variant="hero">
-              Try Demo
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-        </Card>
       </div>
     </div>
     </>

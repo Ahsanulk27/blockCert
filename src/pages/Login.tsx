@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { loginIssuer
+import { loginIssuer } from "@/api/auth";
+import { useAuth } from "@/components/AuthContext";
 
- } from "@/api/auth";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,14 +27,12 @@ export default function Login() {
     try {
       const data = await loginIssuer({ email, password });
 
-      // Store token in localStorage 
       localStorage.setItem("token", data.token);
-
-      // Optional: store issuer info
-      // localStorage.setItem("issuer", JSON.stringify(data.issuer));
-
-      console.log("Login successful:", data);
-      window.location.href = "/"; 
+      
+      login();
+      
+      // Redirect to dashboard
+      navigate("/dashboard");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

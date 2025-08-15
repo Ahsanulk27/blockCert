@@ -5,6 +5,7 @@ import issuerRoutes from './routes/issuer';
 import certificateRoutes from "./routes/certificateRoutes";
 dotenv.config();
 import cors from "cors";
+import path from 'path';
 
 
 const app = express();
@@ -16,11 +17,14 @@ app.use(cors({
     credentials: true,
   }));
   
+app.use("/certificates", express.static(path.join(__dirname, "../../certificates")));
+
 
 app.use(express.json());
 
 app.use("/api/issuer", issuerRoutes);
 app.use("/api/certificates", certificateRoutes);
+
 
 app.get('/', (req,res) => {
     console.log("API is running")

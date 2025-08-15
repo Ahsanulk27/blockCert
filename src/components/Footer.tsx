@@ -38,9 +38,6 @@ export function Footer() {
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-blockchain flex items-center justify-center">
-                <Shield className="w-5 h-5 text-foreground" />
-              </div>
               <span className="text-xl font-bold">
                 Block<span className="text-primary">Cert</span>
               </span>
@@ -122,7 +119,7 @@ export function Footer() {
         <div className="border-t border-card-border pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              © 2024 BlockCert. All rights reserved. Built with blockchain technology.
+              © {new Date().getFullYear()} BlockCert. All rights reserved. Built with blockchain technology.
             </div>
             <div className="text-sm text-muted-foreground">
               Secured by cryptographic hashing & distributed ledger technology
