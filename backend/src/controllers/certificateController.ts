@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import createcertificate from "../services/certificateService";
 import { generateCertificatePDF } from "../../utils/generateCertificate";
+import { prisma } from "../db";
 
 export const issueCertificate = async (req: Request, res: Response) => {
   try {
@@ -22,7 +23,7 @@ export const issueCertificate = async (req: Request, res: Response) => {
         .json({ message: "Unauthorized: Issuer info missing" });
     }
 
-    // 3. Call service to create certificate record
+    // Call service
     const certificate = await createcertificate.createCertificate({
       studentName,
       studentId,
@@ -42,7 +43,7 @@ export const issueCertificate = async (req: Request, res: Response) => {
       dateIssued: certificate.dateIssued,
     });
 
-    // Create a public URL instead of local file path
+    // Create a public URL 
     const fileName = `${certificate.studentName}_${certificate.course}.pdf`;
     const pdfUrl =  `/certificates/${certificate.studentName}_${certificate.course}.pdf`;
     
@@ -56,3 +57,25 @@ export const issueCertificate = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const verifyCertificate = async (req: Request, res: Response) => {
+  try {
+  const { id } = req.params;
+
+  const certificate = await prisma.certificate.findUnique({
+    where: { id },
+  });
+
+  if (!certificate) {
+    return res.status(404).json({ valid: false, message: "Certificate not found" });
+  }
+
+  return res.json({
+    valid: true,
+    certificate,
+  });
+  } catch (error) {
+    console.error("Error verifying certificate:", error);
+    return res.status(500).json({ valid: false, message: "Internal server error" });
+  }
+}

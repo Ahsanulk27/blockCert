@@ -27,14 +27,11 @@ interface CertificateDetails {
 
 export default function Verify() {
   const [dragActive, setDragActive] = useState(false);
-  const [verificationResult, setVerificationResult] = useState<
-    "verified" | "tampered" | null
-  >(null);
+  const [verificationResult, setVerificationResult] = useState<"verified" | "tampered" | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [certificateId, setCertificateId] = useState("");
   const [certificateHash, setCertificateHash] = useState("");
-  const [certificateDetails, setCertificateDetails] =
-    useState<CertificateDetails | null>(null);
+  const [certificateDetails, setCertificateDetails] = useState<CertificateDetails | null>(null);
 
   const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -50,22 +47,31 @@ export default function Verify() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleVerification();
     }
   };
 
   const handleVerification = async () => {
-    if (!certificateId) {
-      alert("Please enter a Certificate ID");
+    if (!certificateId && !certificateHash) {
+      alert("Please enter either a Certificate ID or Hash");
       return;
     }
+
     setIsVerifying(true);
     setVerificationResult(null);
+    
     try {
-      const res = await axios.get(
-        `${API_BASE}/certificates/verify/${certificateId}`
-      );
+      const res = await axios.get<{
+        valid: boolean;
+        certificate?: CertificateDetails;
+      }>(`${API_BASE}/certificates/verify/${certificateId}`, {
+        params: {
+          hash: certificateHash || undefined
+        }
+      });
+      
       if (res.data.valid && res.data.certificate) {
         setVerificationResult("verified");
         setCertificateDetails(res.data.certificate);
@@ -93,8 +99,7 @@ export default function Verify() {
               <span className="text-glow">Verify</span> Certificate
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Enter certificate ID or hash to instantly verify authenticity
-              against our blockchain records.
+              Enter certificate ID or hash to instantly verify authenticity against our blockchain records.
             </p>
           </div>
 
@@ -105,12 +110,14 @@ export default function Verify() {
                 <Upload className="w-6 h-6 text-primary" />
                 Upload Certificate
               </h2>
+
+              {/* Drag & Drop Area */}
               <div
-                className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
+                className={\`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 \${
                   dragActive
                     ? "border-primary bg-primary/5 shadow-glow"
                     : "border-card-border hover:border-primary/50"
-                }`}
+                }\`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
@@ -135,12 +142,13 @@ export default function Verify() {
               </div>
             </Card>
 
-            {/* Hash/ID Verification */}
+            {/* Hash Verification */}
             <Card className="card-blockchain p-8">
               <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
                 <Hash className="w-6 h-6 text-secondary" />
                 Verify by ID/Hash
               </h2>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
@@ -152,23 +160,25 @@ export default function Verify() {
                     onChange={(e) => setCertificateId(e.target.value)}
                   />
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Certificate Hash (Optional)
                   </label>
-                  <Input
-                    placeholder="Enter SHA-256 hash..."
+                  <Input 
+                    placeholder="Enter SHA-256 hash..." 
                     className="font-mono text-sm"
                     value={certificateHash}
                     onChange={(e) => setCertificateHash(e.target.value)}
                   />
                 </div>
+
                 <Button
                   onClick={handleVerification}
                   variant="cyber"
                   size="lg"
                   className="w-full"
-                  disabled={isVerifying || !certificateId}
+                  disabled={isVerifying || (!certificateId && !certificateHash)}
                 >
                   {isVerifying ? (
                     <>
@@ -189,11 +199,11 @@ export default function Verify() {
           {/* Verification Result */}
           {verificationResult && (
             <Card
-              className={`card-blockchain p-8 mt-8 animate-scale-in ${
+              className={\`card-blockchain p-8 mt-8 animate-scale-in \${
                 verificationResult === "verified"
                   ? "border-success/30 bg-success/5"
                   : "border-destructive/30 bg-destructive/5"
-              }`}
+              }\`}
             >
               <div className="text-center">
                 {verificationResult === "verified" && certificateDetails ? (
@@ -203,8 +213,7 @@ export default function Verify() {
                       Certificate Verified ✓
                     </h3>
                     <p className="text-muted-foreground mb-6">
-                      This certificate is authentic and has not been tampered
-                      with.
+                      This certificate is authentic and has not been tampered with.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div className="bg-card p-4 rounded-lg">
@@ -216,9 +225,7 @@ export default function Verify() {
                       <div className="bg-card p-4 rounded-lg">
                         <div className="font-medium">Issued Date</div>
                         <div className="text-muted-foreground">
-                          {new Date(
-                            certificateDetails.dateIssued
-                          ).toLocaleDateString()}
+                          {new Date(certificateDetails.dateIssued).toLocaleDateString()}
                         </div>
                       </div>
                       <div className="bg-card p-4 rounded-lg">
@@ -236,13 +243,11 @@ export default function Verify() {
                       Certificate Invalid ✗
                     </h3>
                     <p className="text-muted-foreground mb-6">
-                      This certificate has been tampered with or is not in our
-                      blockchain records.
+                      This certificate has been tampered with or is not in our blockchain records.
                     </p>
                     <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
                       <div className="text-sm text-destructive">
-                        ⚠️ Warning: This certificate cannot be trusted. Contact
-                        the issuing institution for verification.
+                        ⚠️ Warning: This certificate cannot be trusted. Contact the issuing institution for verification.
                       </div>
                     </div>
                   </>
