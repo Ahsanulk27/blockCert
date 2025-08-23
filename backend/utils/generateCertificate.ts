@@ -9,6 +9,7 @@ export async function generateCertificatePDF(data: any) {
 
   // Replace placeholders
   html = html
+    .replace("{{CERTIFICATE_ID}}", data.id ? String(data.id) : "")
     .replace("{{STUDENT_NAME}}", data.studentName)
     .replace("{{COURSE_NAME}}", data.course)
     .replace("{{GRADE}}", data.grade)

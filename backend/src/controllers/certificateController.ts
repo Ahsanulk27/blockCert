@@ -36,6 +36,7 @@ export const issueCertificate = async (req: Request, res: Response) => {
     });
 
     const pdfPath = await generateCertificatePDF({
+      id: certificate.id,
       studentName: certificate.studentName,
       course: certificate.course,
       grade: certificate.grade,
@@ -43,14 +44,14 @@ export const issueCertificate = async (req: Request, res: Response) => {
       dateIssued: certificate.dateIssued,
     });
 
-    // Create a public URL 
+    // Create a public URL
     const fileName = `${certificate.studentName}_${certificate.course}.pdf`;
-    const pdfUrl =  `/certificates/${certificate.studentName}_${certificate.course}.pdf`;
-    
+    const pdfUrl = `/certificates/${certificate.studentName}_${certificate.course}.pdf`;
+
     return res.status(201).json({
       message: "Certificate issued successfully",
       certificate,
-      pdfUrl, 
+      pdfUrl,
     });
   } catch (error) {
     console.error("Error issuing certificate:", error);
@@ -60,22 +61,55 @@ export const issueCertificate = async (req: Request, res: Response) => {
 
 export const verifyCertificate = async (req: Request, res: Response) => {
   try {
-  const { id } = req.params;
+    const { id } = req.params;
 
-  const certificate = await prisma.certificate.findUnique({
-    where: { id },
-  });
+    const certificate = await prisma.certificate.findUnique({
+      where: { id },
+    });
 
-  if (!certificate) {
-    return res.status(404).json({ valid: false, message: "Certificate not found" });
-  }
+    if (!certificate) {
+      return res
+        .status(404)
+        .json({ valid: false, message: "Certificate not found" });
+    }
 
-  return res.json({
-    valid: true,
-    certificate,
-  });
+    return res.json({
+      valid: true,
+      certificate,
+    });
   } catch (error) {
     console.error("Error verifying certificate:", error);
-    return res.status(500).json({ valid: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ valid: false, message: "Internal server error" });
   }
-}
+};
+
+
+export const getCertificates = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id; // from JWT middleware
+    const certificates = await prisma.certificate.findMany({
+      where: { issuerId: userId },
+      orderBy: { dateIssued: "desc" }
+    });
+    res.json(certificates);
+  } catch (error) {
+    console.error("Error fetching certificates:", error);
+    res.status(500).json({ message: "Error fetching certificates" });
+  }
+};
+
+export const revokeCertificate = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const certificate = await prisma.certificate.update({
+      where: { id },
+      data: { revoked: true }
+    });
+    res.json({ message: "Certificate revoked successfully", certificate });
+  } catch (error) {
+    console.error("Error revoking certificate:", error);
+    res.status(500).json({ message: "Error revoking certificate" });
+  }
+};

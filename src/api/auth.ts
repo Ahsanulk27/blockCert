@@ -1,4 +1,19 @@
+import axios from "axios";
+
 const API_BASE = "http://localhost:5000/api";
+
+// Simple function to get auth headers
+export const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No authentication token found");
+  }
+
+  return {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  };
+};
 
 export const registerIssuer = async (data: {
   name: string;

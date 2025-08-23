@@ -38,4 +38,5 @@ model Certificate {
   issuer            Issuer   @relation(fields: [issuerId], references: [id])
   issuerId          String
   createdAt         DateTime @default(now())
+  revoked   Boolean  @default(false)
 }
