@@ -1,15 +1,14 @@
-import { prisma } from '../db';  
-import { generateCertificatePDF } from '../../utils/generateCertificate';
+import { prisma } from "../db";
 
 interface CertificateInput {
   studentName: string;
   studentId: string;
   course: string;
   grade: string;
-  dateIssued: Date; 
+  dateIssued: Date;
   institution: string;
   notes?: string;
-  issuerId: string;  
+  issuerId: string;
 }
 
 const createCertificate = async (data: CertificateInput) => {
@@ -20,29 +19,15 @@ const createCertificate = async (data: CertificateInput) => {
       studentId: data.studentId,
       course: data.course,
       grade: data.grade,
-      dateIssued: new Date(data.dateIssued),  
+      dateIssued: new Date(data.dateIssued),
       institutionName: data.institution,
       additionalNotes: data.notes,
       issuerId: data.issuerId,
     },
   });
 
-  // 2. Generate the PDF based on certificate data
-  // You might want to pass newCertificate to include DB-generated fields if needed
-  const pdfPath = await generateCertificatePDF({
-    studentName: newCertificate.studentName,
-    course: newCertificate.course,
-    grade: newCertificate.grade,
-    institutionName: newCertificate.institutionName,
-    dateIssued: newCertificate.dateIssued,
-  });
-
-
-  // 4. Return both DB record and PDF path
-  return {
-    ...newCertificate,
-    pdfPath,
-  };
+  // Return only DB record; PDF generation handled in controller
+  return newCertificate;
 };
 
 export default {

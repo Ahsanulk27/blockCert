@@ -1,51 +1,51 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-contract CertificateIssuer {
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract CertificateIssuer is Ownable {
     struct Certificate {
-        string recipientName;
-        string courseName;
-        string ipfsHash; // CID of the certificate file
-        uint256 timestamp;
-        bool isRevoked;
+        bytes32 certHash;    
+        string ipfsCid;     
+        uint256 issuedAt;
+        bool revoked;
     }
 
-    address public admin;
-    uint256 public certCount = 0;
-
+    // sequential id for easy referencing
+    uint256 public certCount;
     mapping(uint256 => Certificate) public certificates;
+    mapping(bytes32 => uint256) public hashToCertId; // lookup to check existence
 
-    modifier onlyAdmin() {
-        require(msg.sender == admin, "Not authorized");
-        _;
+    event CertificateIssued(uint256 indexed certId, bytes32 indexed certHash, string ipfsCid, uint256 timestamp);
+    event CertificateRevoked(uint256 indexed certId, bytes32 indexed certHash, uint256 timestamp);
+
+    constructor(address initialOwner) Ownable(initialOwner) {}
+    
+    function issueCertificate(bytes32 _certHash, string calldata _ipfsCid) external onlyOwner returns (uint256) {
+        require(_certHash != bytes32(0), "Invalid hash");
+        // prevent duplicate
+        require(hashToCertId[_certHash] == 0, "Certificate already issued");
+
+        uint256 id = ++certCount;
+        certificates[id] = Certificate({ certHash: _certHash, ipfsCid: _ipfsCid, issuedAt: block.timestamp, revoked: false });
+        hashToCertId[_certHash] = id;
+
+        emit CertificateIssued(id, _certHash, _ipfsCid, block.timestamp);
+        return id;
     }
 
-    constructor() {
-        admin = msg.sender; // deployer is admin
+    function revokeCertificate(uint256 _certId) external onlyOwner {
+        Certificate storage cert = certificates[_certId];
+        require(cert.issuedAt != 0, "Not found");
+        cert.revoked = true;
+        emit CertificateRevoked(_certId, cert.certHash, block.timestamp);
     }
 
-    function issueCertificate(
-        string memory _recipientName,
-        string memory _courseName,
-        string memory _ipfsHash
-    ) public onlyAdmin {
-        certificates[certCount] = Certificate(
-            _recipientName,
-            _courseName,
-            _ipfsHash,
-            block.timestamp,
-            false
-        );
-        certCount++;
+    function getCertificateById(uint256 _certId) external view returns (Certificate memory) {
+        return certificates[_certId];
     }
 
-    function revokeCertificate(uint256 _id) public onlyAdmin {
-        require(_id < certCount, "Invalid cert ID");
-        certificates[_id].isRevoked = true;
-    }
-
-    function getCertificate(uint256 _id) public view returns (Certificate memory) {
-        require(_id < certCount, "Invalid cert ID");
-        return certificates[_id];
+    function getCertIdByHash(bytes32 _certHash) external view returns (uint256) {
+        return hashToCertId[_certHash]; 
     }
 }

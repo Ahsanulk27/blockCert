@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/Navbar";
 import {
   Upload,
@@ -31,8 +30,8 @@ export default function Verify() {
     "verified" | "tampered" | null
   >(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [certificateId, setCertificateId] = useState("");
-  const [certificateHash, setCertificateHash] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [certificateDetails, setCertificateDetails] =
     useState<CertificateDetails | null>(null);
 
@@ -51,24 +50,44 @@ export default function Verify() {
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleVerification();
+      const f = e.dataTransfer.files[0];
+      if (f.type !== "application/pdf") {
+        alert("Please upload a PDF file");
+        return;
+      }
+      setFile(f);
     }
   };
 
   const handleVerification = async () => {
-    if (!certificateId) {
-      alert("Please enter a Certificate ID");
+    if (!file) {
+      alert("Please upload a PDF first");
       return;
     }
     setIsVerifying(true);
     setVerificationResult(null);
     try {
-      const res = await axios.get(
-        `${API_BASE}/certificates/verify/${certificateId}`
-      );
-      if (res.data.valid && res.data.certificate) {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await axios.post(`${API_BASE}/certificates/verify`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (res.data.valid) {
         setVerificationResult("verified");
-        setCertificateDetails(res.data.certificate);
+        setCertificateDetails({
+          id: "",
+          studentName: "",
+          institutionName: res.data.institutionName || "",
+          course: res.data.course,
+          dateIssued: res.data.issuedAt
+            ? new Date(res.data.issuedAt * 1000).toISOString()
+            : "",
+          blockchainHash: res.data.blockchainHash?.startsWith("0x")
+            ? res.data.blockchainHash
+            : res.data.blockchainHash
+            ? `0x${res.data.blockchainHash}`
+            : "",
+        });
       } else {
         setVerificationResult("tampered");
         setCertificateDetails(null);
@@ -98,12 +117,12 @@ export default function Verify() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-8">
             {/* Upload Section */}
             <Card className="card-blockchain p-8">
               <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
                 <Upload className="w-6 h-6 text-primary" />
-                Upload Certificate
+                Upload Certificate (PDF)
               </h2>
               <div
                 className={`border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 ${
@@ -127,48 +146,36 @@ export default function Verify() {
                     <p className="text-sm text-muted-foreground mb-4">
                       Supports PDF files
                     </p>
-                    <Button variant="outline" size="sm">
+                    <input
+                      ref={fileInputRef}
+                      id="pdfInput"
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
                       Choose File
                     </Button>
+                    {file && (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        Selected: {file.name}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </Card>
-
-            {/* Hash/ID Verification */}
-            <Card className="card-blockchain p-8">
-              <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
-                <Hash className="w-6 h-6 text-secondary" />
-                Verify by ID/Hash
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Certificate ID
-                  </label>
-                  <Input
-                    placeholder="Enter certificate ID..."
-                    value={certificateId}
-                    onChange={(e) => setCertificateId(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Certificate Hash (Optional)
-                  </label>
-                  <Input
-                    placeholder="Enter SHA-256 hash..."
-                    className="font-mono text-sm"
-                    value={certificateHash}
-                    onChange={(e) => setCertificateHash(e.target.value)}
-                  />
-                </div>
+              <div className="mt-6">
                 <Button
                   onClick={handleVerification}
                   variant="cyber"
                   size="lg"
                   className="w-full"
-                  disabled={isVerifying || !certificateId}
+                  disabled={isVerifying || !file}
                 >
                   {isVerifying ? (
                     <>
@@ -178,7 +185,7 @@ export default function Verify() {
                   ) : (
                     <>
                       <Search className="w-5 h-5 mr-2" />
-                      Search Blockchain
+                      Upload & Verify
                     </>
                   )}
                 </Button>

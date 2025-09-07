@@ -110,7 +110,7 @@ export default function Dashboard() {
                 Manage and monitor your issued certificates
               </p>
             </div>
-            <Button variant="hero" size="lg">
+            <Button onClick={() => navigate("/issue")}variant="hero" size="lg">
               <FileText className="w-5 h-5 mr-2" />
               Issue New Certificate
             </Button>
@@ -143,11 +143,6 @@ export default function Dashboard() {
                     <option value="verified">Verified</option>
                     <option value="revoked">Revoked</option>
                   </select>
-
-                  <Button variant="outline" size="sm">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
                 </div>
               </div>
             </div>

@@ -31,6 +31,8 @@ export default function Issue() {
     notes: "",
   });
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+  const [chainCertId, setChainCertId] = useState<string | null>(null);
+  const [chainHash, setChainHash] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     setIsProcessing(true);
@@ -51,6 +53,8 @@ export default function Issue() {
 
       // Set the download URL from the API response
       setDownloadUrl(result.pdfUrl);
+      setChainCertId(result?.certificateId || result?.certificate?.certificateId || null);
+      setChainHash(result?.certificate?.blockchainHash || null);
       setIsProcessing(false);
       setStep(4);
     } catch (err) {
@@ -360,30 +364,28 @@ export default function Issue() {
                     <div className="space-y-2 text-sm text-left">
                       <div className="flex justify-between">
                         <span>Certificate ID:</span>
-                        <span className="font-mono">CERT-2024-001</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Blockchain Hash:</span>
-                        <span className="font-mono text-primary">
-                          0x7d4a...9f2e
+                        <span className="font-mono">
+                          {chainCertId || "Pending"}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Block Number:</span>
-                        <span>18,745,123</span>
+                        <span>Blockchain Hash:</span>
+                        <span className="font-mono text-primary break-all">
+                          {chainHash || "Pending"}
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-card p-6 rounded-lg">
-                    <h3 className="font-semibold mb-3">Verification URL</h3>
-                    <div className="text-sm">
-                      <code className="bg-muted p-2 rounded text-xs break-all block mb-3">
-                        https://blockcert.com/verify/CERT-2024-001
-                      </code>
-                      <Badge variant="secondary" className="text-xs">
-                        Share this URL for instant verification
-                      </Badge>
+                    <h3 className="font-semibold mb-3">File URL</h3>
+                    <div className="text-sm text-left space-y-2">
+                      <div className="flex justify-between">
+                        <span>IPFS URL:</span>
+                        <span className="font-mono text-xs break-all">
+                          {downloadUrl || "Pending"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -392,14 +394,11 @@ export default function Issue() {
                   {downloadUrl && (
                     <Button
                       variant="hero"
-                      onClick={() =>
-                        window.open(`http://localhost:5000${downloadUrl}`, "_blank")
-                      }
+                      onClick={() => window.open(downloadUrl, "_blank")}
                     >
-                      Download Certificate
+                      Open Certificate (IPFS)
                     </Button>
                   )}
-                  <Button variant="outline">Share Verification Link</Button>
                   <Button variant="ghost" onClick={() => setStep(1)}>
                     Issue Another
                   </Button>

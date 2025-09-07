@@ -32,7 +32,7 @@ model Certificate {
   grade             String
   dateIssued        DateTime
   additionalNotes   String?
-  fileUrl           String?
+  ipfsCid           String?
   blockchainHash    String?
   transactionId     String?
   issuer            Issuer   @relation(fields: [issuerId], references: [id])
@@ -40,3 +40,6 @@ model Certificate {
   createdAt         DateTime @default(now())
   revoked   Boolean  @default(false)
 }
+
+
+

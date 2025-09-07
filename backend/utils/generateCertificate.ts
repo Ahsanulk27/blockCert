@@ -31,10 +31,15 @@ export async function generateCertificatePDF(data: any) {
   const fileName = `${data.studentName}_${data.course}.pdf`;
   const outputPath = path.join(publicDir, fileName);
 
-  
-
-  await page.pdf({ path: outputPath, format: "A4" });
-
+  // Generate PDF buffer and also persist a copy to disk for convenience
+  const pdfBuffer = await page.pdf({ format: "A4" });
   await browser.close();
-  return outputPath;
+
+  try {
+    fs.writeFileSync(outputPath, pdfBuffer);
+  } catch (_) {
+    // Ignore disk write errors; buffer is still returned for IPFS upload
+  }
+
+  return pdfBuffer;
 }
