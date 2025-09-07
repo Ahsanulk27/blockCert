@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 
 // Allow requests from frontend
 app.use(cors({
-    origin: "http://localhost:8080", // frontend URL
+    origin: "http://localhost:8080", 
     credentials: true,
   }));
   
