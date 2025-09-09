@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import createcertificate from "../services/certificateService";
-import { generateCertificatePDF } from "../../utils/generateCertificate";
+import { generateCertificatePDF } from "../utils/generateCertificate";
 import { prisma } from "../db";
 import {
   issueCertificateOnChain,
