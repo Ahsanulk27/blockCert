@@ -7,13 +7,12 @@ dotenv.config();
 import cors from "cors";
 import path from 'path';
 
-
 const app = express();
 const prisma = new PrismaClient();
 
 // Allow requests from frontend
 app.use(cors({
-    origin: "http://localhost:8080", 
+    origin: process.env.FRONTEND_URL, 
     credentials: true,
   }));
   
