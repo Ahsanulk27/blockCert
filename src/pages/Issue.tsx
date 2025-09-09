@@ -16,7 +16,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://blockcert.onrender.com";
 
 export default function Issue() {
   const [step, setStep] = useState(1);

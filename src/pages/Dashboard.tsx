@@ -31,7 +31,7 @@ export default function Dashboard() {
         setLoading(true);
         setError(null);
         const headers = getAuthHeaders();
-        const res = await axios.get("http://localhost:5000/api/certificates", {
+        const res = await axios.get("https://blockcert.onrender.com/certificates", {
           headers,
         });
         setCertificates(res.data);
@@ -61,7 +61,7 @@ export default function Dashboard() {
     try {
       const headers = getAuthHeaders();
       await axios.patch(
-        `http://localhost:5000/api/certificates/${id}/revoke`,
+        `https://blockcert.onrender.com/certificates/${id}/revoke`,
         {},
         { headers }
       );
