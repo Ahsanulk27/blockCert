@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = "https://blockcert.onrender.com";
+const API_BASE = "https://blockcert.onrender.com/api";
 
 // Simple function to get auth headers
 export const getAuthHeaders = () => {
