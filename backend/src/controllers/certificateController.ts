@@ -14,7 +14,7 @@ async function uploadToIpfsViaPinata(fileBuffer: Buffer): Promise<string> {
   const url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
 
   const form = new FormData();
-  form.append("file", new Blob([fileBuffer]), "certificate.pdf");
+  form.append("file", new Blob([new Uint8Array(fileBuffer)]), "certificate.pdf");
 
   const headers: Record<string, string> = {
     Accept: "application/json",
