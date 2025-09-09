@@ -10,7 +10,6 @@ async function main() {
     ethers.formatEther(await deployer.provider.getBalance(deployer.address))
   );
 
-  // Note: Changed from "CertificateContract" to "CertificateIssuer" to match your contract name
   const Certificate = await ethers.getContractFactory("CertificateIssuer");
 
   // Pass the deployer's address as the initial owner
