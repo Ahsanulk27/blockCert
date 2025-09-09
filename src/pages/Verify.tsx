@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 
-const API_BASE = "https://blockcert.onrender.com";
+const API_BASE = "https://blockcert.onrender.com/api";
 
 interface CertificateDetails {
   id: string;
