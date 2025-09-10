@@ -1,5 +1,12 @@
-import {PrismaClient} from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+// Add "?pgbouncer=true" to DATABASE_URL to disable prepared statements
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL + "?pgbouncer=true",
+    },
+  },
+});
 
-export {prisma};
+export { prisma };
