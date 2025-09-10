@@ -1,12 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 
-// Add "?pgbouncer=true" to DATABASE_URL to disable prepared statements
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL + "?pgbouncer=true",
-    },
-  },
-});
+declare global {
+  var prisma: PrismaClient | undefined;
+}
 
-export { prisma };
+export const prisma =
+  global.prisma ||
+  new PrismaClient({
+    log: ["error", "warn"],
+  });
+
+if (process.env.NODE_ENV !== "production") global.prisma = prisma;
