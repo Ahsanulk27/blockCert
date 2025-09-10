@@ -4,7 +4,7 @@ import puppeteer from "puppeteer";
 
 export async function generateCertificatePDF(data: any) {
   // Load HTML template
-  const templatePath = path.join(process.cwd(), "src/templates/certificateTemplate.html");
+  const templatePath = path.join(__dirname, "../templates/certificateTemplate.html");
   let html = fs.readFileSync(templatePath, "utf-8");
 
   // Replace placeholders
