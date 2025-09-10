@@ -31,8 +31,6 @@ app.use(
   })
 );
 
-// Handle preflight requests
-app.options("/*", cors());
 
 app.use(
   "/certificates",
